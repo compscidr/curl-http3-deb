@@ -1,0 +1,18 @@
+name: Deploy curl-http3-quic
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+
+jobs:
+  deploy:
+    name: Push to Gemfury
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Image and Deploy
+        run: docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH .
+        env:
+          GFKEY_PUSH: ${{ secrets.GFKEY_PUSH }}
