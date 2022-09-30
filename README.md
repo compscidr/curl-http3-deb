@@ -6,9 +6,7 @@ Turned the instructions here: https://curl.se/docs/http3.html into a .deb
 installer that can be installed on Ubuntu 22.04.
 
 The instructions were added into a Dockerfile and install of running
-`make install`, we use `checkinstall` to generate deb packages. The
-dependencies should be setup correctly such that one should be able to
-just install the curl package from the gemfury repo, and it should work.
+`make install`, we use `checkinstall` to generate deb packages.
 
 ## Installation Instructions
 
@@ -19,10 +17,19 @@ deb [trusted=yes] https://apt.fury.io/compscidr/ /
 
 Then run:
 ```
-sudo apt update && sudo apt install curl
+sudo apt update && sudo apt install \
+    openssl=3.0.0+quic-jammy-1 \
+    nghttp3=0.7.0-4-g8597ab3-jammy-1 \
+    ngtcp2=0.9.0-14-gccb745e5-jammy-1 \
+    curl=7-85-0-177-g0a652280c-jammy-1
 ```
 
-Note, if you already have curl installed, you may need to remove it first.
+Note, if you already have curl installed, you may need to remove it first. 
+You may also get ssl warnings about downgrade. If you want you can try adding
+`--allow-downgrades` to the `apt-install` but this could break things. 
+
+I currently use this for a docker container, so its not going to break an
+entire system, but seems to be working fine with a ubuntu22.04 container.
 
 ## TODO
 - rename the package,so it doesn't conflict with the official curl package
