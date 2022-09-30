@@ -62,7 +62,7 @@ RUN ls -la /
 
 FROM ubuntu:22.04 as deploy
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates curl
+    ca-certificates curl \
     && apt-get update -qq && apt-get clean
 COPY --from=build /*.deb /
 RUN ls -la /
