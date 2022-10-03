@@ -19,7 +19,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build Image and Deploy
         run: |
-          docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH -t compscidr/curl-http3-quic:${{ github.sha }} .
+          docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH .
+          docker build -f Dockerfile --target curl --build-arg GFKEY_PUSH=$GFKEY_PUSH -t compscidr/curl-http3-quic:${{ github.sha }} .
           docker push compscidr/curl-http3-quic:${{ github.sha }}
         env:
           GFKEY_PUSH: ${{ secrets.GFKEY_PUSH }}

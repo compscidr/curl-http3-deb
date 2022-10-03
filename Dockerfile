@@ -60,6 +60,13 @@ RUN checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(g
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2"
 RUN ls -la /
 
+# final image with curl for dockerhub
+FROM ubuntu:22.04 as curl
+COPY --from=build /*.deb /
+RUN dpkg -i /*openssl*.deb && dpkg -i /*nghttp3*.deb && dpkg -i /*ngtcp2*.deb && dpkg -i /*curl*.deb
+ENTRYPOINT ["/usr/local/bin/curl"]
+
+# just a step that publishes the deb files to gemfury
 FROM ubuntu:22.04 as deploy
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates curl \
