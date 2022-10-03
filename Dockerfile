@@ -62,6 +62,9 @@ RUN ls -la /
 
 # final image with curl for dockerhub
 FROM ubuntu:22.04 as curl
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && apt-get update -qq && apt-get clean
 COPY --from=build /*.deb /
 RUN dpkg -i /*openssl*.deb && dpkg -i /*nghttp3*.deb && dpkg -i /*ngtcp2*.deb && dpkg -i /*curl*.deb
 ENTRYPOINT ["/usr/local/bin/curl"]
