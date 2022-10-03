@@ -12,7 +12,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build Image and Deploy
-        run: docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH .
+        run: |
+          docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH -t compscidr/curl-http3-quic:${{ github.sha }} .
+          docker push compscidr/curl-http3-quic:${{ github.sha }}
         env:
           GFKEY_PUSH: ${{ secrets.GFKEY_PUSH }}
