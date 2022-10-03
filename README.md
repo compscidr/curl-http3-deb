@@ -8,6 +8,9 @@ installer that can be installed on Ubuntu 22.04.
 The instructions were added into a Dockerfile and install of running
 `make install`, we use `checkinstall` to generate deb packages.
 
+This is similar to https://github.com/yurymuski/curl-http3, but uses
+`ngtcp2` and `nghttp3` instead of `quiche`.
+
 ## Installation Instructions
 
 Add the following to /etc/apt/sources.list.d/compscidr.list:
