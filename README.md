@@ -11,9 +11,15 @@ The instructions were added into a Dockerfile and install of running
 This is similar to https://github.com/yurymuski/curl-http3, but uses
 `ngtcp2` and `nghttp3` instead of `quiche`.
 
+## Running via dockerhub
+```shell
+docker run compscidr/curl-http3-quic --version
+```
+
 ## Installation Instructions
 
-Add the following to /etc/apt/sources.list.d/compscidr.list:
+If you actually want to install the packages onto your system, a
+add the following to /etc/apt/sources.list.d/compscidr.list:
 ```
 deb [trusted=yes] https://apt.fury.io/compscidr/ /
 ```
@@ -26,6 +32,9 @@ sudo apt update && sudo apt install \
     ngtcp2=0.9.0-14-gccb745e5-jammy-1 \
     curl=7-85-0-177-g0a652280c-jammy-1
 ```
+Note, the order is important because I don't seem to have the dependencies
+set with the versions correctly yet, but if you install each in order it
+will work.
 
 Note, if you already have curl installed, you may need to remove it first. 
 You may also get ssl warnings about downgrade. If you want you can try adding

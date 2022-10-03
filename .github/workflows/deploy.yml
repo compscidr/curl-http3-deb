@@ -22,5 +22,7 @@ jobs:
           docker build -f Dockerfile --target deploy --build-arg GFKEY_PUSH=$GFKEY_PUSH .
           docker build -f Dockerfile --target curl --build-arg GFKEY_PUSH=$GFKEY_PUSH -t compscidr/curl-http3-quic:${{ github.sha }} .
           docker push compscidr/curl-http3-quic:${{ github.sha }}
+          docker tag compscidr/curl-http3-quic:${{ github.sha }} compscidr/curl-http3-quic:latest
+          docker push compscidr/curl-http3-quic:latest
         env:
           GFKEY_PUSH: ${{ secrets.GFKEY_PUSH }}
