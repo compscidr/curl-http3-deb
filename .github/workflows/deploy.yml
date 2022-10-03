@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    name: Push to Gemfury
+    name: Push to Gemfury and Dockerhub
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
