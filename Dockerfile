@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 as prereqs
+FROM ubuntu:24.04 as prereqs
 # based on the ngtcp2 version at https://curl.se/docs/http3.html
 LABEL maintainer="ernstjason1@gmail.com"
 
@@ -61,7 +61,7 @@ RUN checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(g
 RUN ls -la /
 
 # final image with curl for dockerhub
-FROM ubuntu:22.04 as curl
+FROM ubuntu:24.04 as curl
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     && apt-get update -qq && apt-get clean
@@ -70,7 +70,7 @@ RUN dpkg -i /*openssl*.deb && dpkg -i /*nghttp3*.deb && dpkg -i /*ngtcp2*.deb &&
 ENTRYPOINT ["/usr/local/bin/curl"]
 
 # just a step that publishes the deb files to gemfury
-FROM ubuntu:22.04 as deploy
+FROM ubuntu:24.04 as deploy
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates curl \
     && apt-get update -qq && apt-get clean
