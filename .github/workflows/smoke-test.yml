@@ -1,4 +1,7 @@
 name: Smoke Test - Build Docker Image
+# This workflow builds the Docker image to verify that the build process works
+# It runs on all pushes and pull requests to catch build issues early
+# Unlike the deploy workflow, this doesn't require secrets and doesn't publish anything
 
 on:
   push:
