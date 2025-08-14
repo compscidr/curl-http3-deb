@@ -1,0 +1,36 @@
+name: Smoke Test - Build Docker Image
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  smoke-test:
+    name: Build Docker Image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60 # Set reasonable timeout for the build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image with curl target..."
+          echo "This will build OpenSSL, nghttp3, ngtcp2, and curl with HTTP3/QUIC support"
+          docker build -f Dockerfile --target curl -t curl-http3-smoke-test .
+      
+      - name: Test built image
+        run: |
+          echo "Testing that curl binary works in the built image..."
+          docker run --rm curl-http3-smoke-test --version
+          
+          echo "Checking curl features and protocols..."
+          docker run --rm curl-http3-smoke-test --version | grep -E "Features:|Protocols:" || true
+          
+          echo "Testing basic functionality..."
+          docker run --rm curl-http3-smoke-test --help > /dev/null && echo "✓ curl help command works"
+          
+          echo "✓ Docker image build and basic tests completed successfully"
