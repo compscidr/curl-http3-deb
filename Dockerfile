@@ -2,7 +2,7 @@ FROM ubuntu:24.04 as prereqs
 # based on the ngtcp2 version at https://curl.se/docs/http3.html
 LABEL maintainer="ernstjason1@gmail.com"
 
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     wget \
     ca-certificates \
     xz-utils \
@@ -15,7 +15,8 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no
     automake \
     libtool \
     pkg-config \
-    && apt-get update -qq && apt-get clean \
+    rsync \
+    && apt-get clean \
     && update-ca-certificates
 
 # openssl
@@ -29,7 +30,8 @@ RUN make
 RUN make install_sw DESTDIR=/tmp/openssl-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=openssl --pkgversion=$(git branch | sed -n 's/* openssl-//p')-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    sh -c "(cd /tmp/openssl-install && tar cf - .) | (cd / && tar xf -)"
+    sh -c "cd /tmp/openssl-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+RUN ldconfig
 
 # nghttp3
 WORKDIR /usr/src/
@@ -42,7 +44,8 @@ RUN make
 RUN make install DESTDIR=/tmp/nghttp3-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=nghttp3 --pkgversion=$(git describe --tags | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    sh -c "(cd /tmp/nghttp3-install && tar cf - .) | (cd / && tar xf -)"
+    sh -c "cd /tmp/nghttp3-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+RUN ldconfig
 
 # ngtcp2
 WORKDIR /usr/src/
@@ -56,7 +59,8 @@ RUN make
 RUN make install DESTDIR=/tmp/ngtcp2-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=ngtcp2 --pkgversion=$(git describe --tags --always | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3" \
-    sh -c "(cd /tmp/ngtcp2-install && tar cf - .) | (cd / && tar xf -)"
+    sh -c "cd /tmp/ngtcp2-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+RUN ldconfig
 
 # curl with quic
 WORKDIR /usr/src/
@@ -73,14 +77,15 @@ RUN make
 RUN make install DESTDIR=/tmp/curl-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(git describe --tags | sed -n 's/curl-//p' | tr _ -)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2" \
-    sh -c "(cd /tmp/curl-install && tar cf - .) | (cd / && tar xf -)"
+    sh -c "cd /tmp/curl-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+RUN ldconfig
 RUN ls -la /
 
 # final image with curl for dockerhub
 FROM ubuntu:24.04 as curl
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
-    && apt-get update -qq && apt-get clean
+    && apt-get clean
 COPY --from=build /*.deb /
 RUN dpkg -i /*openssl*.deb && dpkg -i /*nghttp3*.deb && dpkg -i /*ngtcp2*.deb && dpkg -i /*curl*.deb
 RUN ldconfig
@@ -88,9 +93,9 @@ ENTRYPOINT ["/usr/local/bin/curl"]
 
 # just a step that publishes the deb files to gemfury
 FROM ubuntu:24.04 as deploy
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates curl \
-    && apt-get update -qq && apt-get clean
+    && apt-get clean
 COPY --from=build /*.deb /
 RUN ls -la /
 ARG GFKEY_PUSH
