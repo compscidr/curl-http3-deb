@@ -70,6 +70,7 @@ WORKDIR /usr/src/curl
 RUN autoreconf -fi
 RUN LDFLAGS="-Wl,-rpath,/usr/local/ssl/lib" \
     ./configure PKG_CONFIG_PATH=/usr/local/ssl/lib/pkgconfig:/usr/local/nghttp3/lib/pkgconfig:/usr/local/ngtcp2/lib/pkgconfig \
+    --prefix=/usr/local \
     --with-openssl=/usr/local/ssl \
     --with-nghttp3=/usr/local/nghttp3 --with-ngtcp2=/usr/local/ngtcp2 \
     --without-libpsl
@@ -89,11 +90,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 COPY --from=build /*.deb /
 RUN dpkg -i /*openssl*.deb && dpkg -i /*nghttp3*.deb && dpkg -i /*ngtcp2*.deb && dpkg -i /*curl*.deb
 RUN ldconfig
-# Debug: Check where curl was installed
-RUN find /usr -name "curl" -type f 2>/dev/null || echo "No curl found in /usr"
-RUN ls -la /usr/local/bin/ || echo "No /usr/local/bin directory"
-RUN which curl || echo "curl not in PATH"
-ENTRYPOINT ["/usr/bin/curl"]
+ENTRYPOINT ["/usr/local/bin/curl"]
 
 # just a step that publishes the deb files to gemfury
 FROM ubuntu:24.04 as deploy
