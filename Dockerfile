@@ -27,10 +27,9 @@ RUN git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
 WORKDIR /usr/src/openssl
 RUN ./config enable-tls1_3 --prefix=/usr/local/ssl --openssldir=/usr/local/ssl --libdir=lib shared
 RUN make
-RUN make install_sw DESTDIR=/tmp/openssl-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=openssl --pkgversion=$(git branch | sed -n 's/* openssl-//p')-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    sh -c "cd /tmp/openssl-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+    make install_sw
 RUN ldconfig
 
 # nghttp3
@@ -41,10 +40,9 @@ WORKDIR /usr/src/nghttp3
 RUN autoreconf -fi -I /usr/share/aclocal/ # https://github.com/nghttp2/nghttp2/issues/620#issuecomment-244531257
 RUN ./configure --prefix=/usr/local/nghttp3 --enable-lib-only
 RUN make
-RUN make install DESTDIR=/tmp/nghttp3-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=nghttp3 --pkgversion=$(git describe --tags | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    sh -c "cd /tmp/nghttp3-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+    make install
 RUN ldconfig
 
 # ngtcp2
@@ -56,10 +54,9 @@ RUN autoreconf -fi
 RUN ./configure PKG_CONFIG_PATH=/usr/local/ssl/lib/pkgconfig:/usr/local/nghttp3/lib/pkgconfig \
     LDFLAGS="-Wl,-rpath,/usr/local/ssl/lib" --prefix=/usr/local/ngtcp2 --enable-lib-only
 RUN make
-RUN make install DESTDIR=/tmp/ngtcp2-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=ngtcp2 --pkgversion=$(git describe --tags --always | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3" \
-    sh -c "cd /tmp/ngtcp2-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+    make install
 RUN ldconfig
 
 # curl with quic
@@ -75,10 +72,9 @@ RUN LDFLAGS="-Wl,-rpath,/usr/local/ssl/lib" \
     --with-nghttp3=/usr/local/nghttp3 --with-ngtcp2=/usr/local/ngtcp2 \
     --without-libpsl
 RUN make
-RUN make install DESTDIR=/tmp/curl-install
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(git describe --tags | sed -n 's/curl-//p' | tr _ -)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2" \
-    sh -c "cd /tmp/curl-install && find . \( -type f -o -type l \) -exec cp --parents {} / \;"
+    make install
 RUN ldconfig
 RUN ls -la /
 
