@@ -25,11 +25,10 @@ WORKDIR /usr/src/
 RUN git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl || \
     git -c http.sslverify=false clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
 WORKDIR /usr/src/openssl
-RUN ./config enable-tls1_3 --prefix=/usr/local/ssl --openssldir=/usr/local/ssl --libdir=lib shared
+RUN ./config enable-tls1_3 --prefix=/usr/local/ssl --openssldir=/usr/local/ssl
 RUN make
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=openssl --pkgversion=$(git branch | sed -n 's/* openssl-//p')-jammy \
-    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    make install_sw
+    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no
 RUN ldconfig
 
 # nghttp3
@@ -41,8 +40,7 @@ RUN autoreconf -fi -I /usr/share/aclocal/ # https://github.com/nghttp2/nghttp2/i
 RUN ./configure --prefix=/usr/local/nghttp3 --enable-lib-only
 RUN make
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=nghttp3 --pkgversion=$(git describe --tags | cut -c2-)-jammy \
-    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    make install
+    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no
 RUN ldconfig
 
 # ngtcp2
@@ -55,8 +53,7 @@ RUN ./configure PKG_CONFIG_PATH=/usr/local/ssl/lib/pkgconfig:/usr/local/nghttp3/
     LDFLAGS="-Wl,-rpath,/usr/local/ssl/lib" --prefix=/usr/local/ngtcp2 --enable-lib-only
 RUN make
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=ngtcp2 --pkgversion=$(git describe --tags --always | cut -c2-)-jammy \
-    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3" \
-    make install
+    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3"
 RUN ldconfig
 
 # curl with quic
@@ -73,8 +70,7 @@ RUN LDFLAGS="-Wl,-rpath,/usr/local/ssl/lib" \
     --without-libpsl
 RUN make
 RUN checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(git describe --tags | sed -n 's/curl-//p' | tr _ -)-jammy \
-    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2" \
-    make install
+    --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2"
 RUN ldconfig
 RUN ls -la /
 
