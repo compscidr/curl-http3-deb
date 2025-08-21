@@ -33,7 +33,7 @@ RUN mkdir -p /tmp/openssl-install
 RUN make DESTDIR=/tmp/openssl-install install
 RUN fakeroot checkinstall --addso=yes -D --install=yes -y --pkgname=openssl --pkgversion=$(git branch | sed -n 's/* openssl-//p')-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    make install
+    sh -c 'cd /tmp/openssl-install && tar -cf - . | tar -xf - -C / 2>/dev/null || true'
 RUN ldconfig
 
 # nghttp3
@@ -49,7 +49,7 @@ RUN mkdir -p /tmp/nghttp3-install
 RUN make DESTDIR=/tmp/nghttp3-install install
 RUN fakeroot checkinstall --addso=yes -D --install=yes -y --pkgname=nghttp3 --pkgversion=$(git describe --tags | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no \
-    make install
+    sh -c 'cd /tmp/nghttp3-install && tar -cf - . | tar -xf - -C / 2>/dev/null || true'
 RUN ldconfig
 
 # ngtcp2
@@ -66,7 +66,7 @@ RUN mkdir -p /tmp/ngtcp2-install
 RUN make DESTDIR=/tmp/ngtcp2-install install
 RUN fakeroot checkinstall --addso=yes -D --install=yes -y --pkgname=ngtcp2 --pkgversion=$(git describe --tags --always | cut -c2-)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3" \
-    make install
+    sh -c 'cd /tmp/ngtcp2-install && tar -cf - . | tar -xf - -C / 2>/dev/null || true'
 RUN ldconfig
 
 # curl with quic
@@ -87,7 +87,7 @@ RUN mkdir -p /tmp/curl-install
 RUN make DESTDIR=/tmp/curl-install install
 RUN fakeroot checkinstall --addso=yes -D --install=yes -y --pkgname=curl --pkgversion=$(git describe --tags | sed -n 's/curl-//p' | tr _ -)-jammy \
     --pkglicense="See upstream" --pakdir=/ --maintainer="Jason Ernst" --nodoc --backup=no --requires="openssl,nghttp3,ngtcp2" \
-    make install
+    sh -c 'cd /tmp/curl-install && tar -cf - . | tar -xf - -C / 2>/dev/null || true'
 RUN ldconfig
 RUN ls -la /
 
