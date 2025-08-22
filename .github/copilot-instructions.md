@@ -34,15 +34,28 @@ Always reference these instructions first and fallback to search or bash command
 - **Use Pre-built Image**: `docker run --rm compscidr/curl-http3-quic --version`
   - Should show: `curl 8.4.1-DEV` with `HTTP3` and `ngtcp2/1.0.0 nghttp3/1.1.0-DEV` features
 - **Basic functionality**: `docker run --rm compscidr/curl-http3-quic --help`
+- **Smoke Test Workflow**: Use `.github/workflows/smoke-test.yml` for comprehensive build validation
+  - Builds from source and tests HTTP3/QUIC functionality
+  - Manually trigger with GitHub Actions workflow_dispatch for testing changes
+  - Faster validation than full deploy pipeline (no publishing steps)
 - **ALWAYS validate any changes by running**: 
   - `docker run --rm compscidr/curl-http3-quic --version | grep HTTP3`
   - Verify HTTP3 support is present in the feature list
 
-### CI/CD Pipeline (.github/workflows/deploy.yml)
+### CI/CD Pipeline
+**Deploy Workflow (.github/workflows/deploy.yml)**:
 - Triggers on pushes to `main` branch (excluding README.md changes)
 - Requires secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_PASSWORD`, `GFKEY_PUSH`
 - **Build timing**: Full CI build takes 45+ minutes. Do not cancel GitHub Actions runs.
 - **Expected failures**: Recent builds may fail due to network/certificate issues
+
+**Smoke Test Workflow (.github/workflows/smoke-test.yml)**:
+- Triggers on all pushes and pull requests for early build validation
+- Builds Docker image to `curl` target (skips deploy stage)
+- No secrets required, doesn't publish packages
+- **Build timing**: ~45+ minutes (builds OpenSSL, nghttp3, ngtcp2, curl from source)
+- Tests basic curl functionality with HTTP3/QUIC support verification
+- **Use for validation**: Manually trigger with workflow_dispatch for testing changes
 
 ## Validation Scenarios
 
@@ -59,7 +72,12 @@ Always reference these instructions first and fallback to search or bash command
    docker run --rm compscidr/curl-http3-quic --version | grep ngtcp2
    ```
 
-3. **If modifying Dockerfile, test build stages**:
+3. **For comprehensive validation, use smoke test workflow**:
+   - Manually trigger `.github/workflows/smoke-test.yml` via GitHub Actions
+   - Builds from source and validates HTTP3/QUIC functionality
+   - Alternative to local build when network access is restricted
+
+4. **If modifying Dockerfile, test build stages locally**:
    - Test prereqs stage: `docker build --target prereqs .` (timeout: 300s)
    - **Only attempt full build if network access is confirmed**: `docker build --target build .` (timeout: 3600s)
 
