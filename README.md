@@ -43,6 +43,17 @@ You may also get ssl warnings about downgrade. If you want you can try adding
 I currently use this for a docker container, so its not going to break an
 entire system, but seems to be working fine with a ubuntu22.04 container.
 
+## Testing
+
+### Smoke Test
+To verify the Docker image builds correctly, you can run the smoke test:
+
+```bash
+./smoke-test.sh
+```
+
+This will build the Docker image and run basic functionality tests. The smoke test is also run automatically in CI for all pushes and pull requests.
+
 ## TODO
 - rename the package,so it doesn't conflict with the official curl package
 - rename the curl binary so it doesn't conflict with the official curl package
