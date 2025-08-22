@@ -21,14 +21,12 @@ Always reference these instructions first and fallback to search or bash command
 - `docker build --target curl -t curl-final .` -- takes 45+ minutes. NEVER CANCEL. Set timeout to 60+ minutes.
 - `docker build .` -- full build takes 45+ minutes. NEVER CANCEL. Set timeout to 60+ minutes.
 
-### Network Dependencies and Known Issues
+### Network Dependencies
 - **CRITICAL**: Build process requires network access to clone from GitHub:
   - `https://github.com/quictls/openssl` (OpenSSL with QUIC support)
   - `https://github.com/ngtcp2/nghttp3` (HTTP/3 library)
   - `https://github.com/ngtcp2/ngtcp2` (QUIC library)
   - `https://github.com/curl/curl` (curl source)
-- **Known Issue**: Docker builds may fail with SSL certificate verification errors in restricted network environments
-- **Workaround**: Use pre-built Docker image `compscidr/curl-http3-quic:latest` for testing and validation
 
 ### Testing and Validation
 - **Use Pre-built Image**: `docker run --rm compscidr/curl-http3-quic --version`
@@ -47,7 +45,6 @@ Always reference these instructions first and fallback to search or bash command
 - Triggers on pushes to `main` branch (excluding README.md changes)
 - Requires secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_PASSWORD`, `GFKEY_PUSH`
 - **Build timing**: Full CI build takes 45+ minutes. Do not cancel GitHub Actions runs.
-- **Expected failures**: Recent builds may fail due to network/certificate issues
 
 **Smoke Test Workflow (.github/workflows/smoke-test.yml)**:
 - Triggers on all pushes and pull requests for early build validation
@@ -75,11 +72,11 @@ Always reference these instructions first and fallback to search or bash command
 3. **For comprehensive validation, use smoke test workflow**:
    - Manually trigger `.github/workflows/smoke-test.yml` via GitHub Actions
    - Builds from source and validates HTTP3/QUIC functionality
-   - Alternative to local build when network access is restricted
+   - Validates build process without requiring local compilation
 
 4. **If modifying Dockerfile, test build stages locally**:
    - Test prereqs stage: `docker build --target prereqs .` (timeout: 300s)
-   - **Only attempt full build if network access is confirmed**: `docker build --target build .` (timeout: 3600s)
+   - **Full build requires network access**: `docker build --target build .` (timeout: 3600s)
 
 ### Build Environment Requirements
 - Docker must be available
@@ -94,7 +91,8 @@ Always reference these instructions first and fallback to search or bash command
 .
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # CI/CD pipeline
+│       ├── deploy.yml          # CI/CD pipeline
+│       └── smoke-test.yml      # Build validation workflow
 ├── .gitignore                  # Excludes .idea
 ├── Dockerfile                  # Multi-stage build definition
 ├── README.md                   # Usage and installation docs
@@ -125,10 +123,8 @@ sudo apt update && sudo apt install \
 ```
 
 ### Troubleshooting
-- **If build fails with SSL certificate errors**: Network restrictions prevent GitHub access
 - **If build takes longer than expected**: This is normal - each compilation step is time-intensive
 - **If CI builds fail**: Check network connectivity and GitHub repository availability
-- **Always use pre-built image for testing** when build environment is restricted
 
 ### Dependencies and Updates
 - **Renovate**: Automated dependency updates via renovate.json
@@ -142,6 +138,6 @@ sudo apt update && sudo apt install \
 1. **ALWAYS start with pre-built image testing** to verify expected behavior
 2. Make minimal changes to Dockerfile if needed
 3. Test prereqs stage first (quick validation)
-4. **Only attempt full build if network access is confirmed**
-5. Use pre-built image for change validation
+4. **Build from source** for full validation
+5. Use smoke test workflow for comprehensive validation
 6. **NEVER cancel long-running builds** - they are expected to take 45+ minutes
