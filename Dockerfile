@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 as prereqs
+FROM ubuntu:26.04 as prereqs
 # based on the ngtcp2 version at https://curl.se/docs/http3.html
 LABEL maintainer="ernstjason1@gmail.com"
 
@@ -92,7 +92,7 @@ RUN ldconfig
 RUN ls -la /
 
 # final image with curl for dockerhub
-FROM ubuntu:24.04 as curl
+FROM ubuntu:26.04 as curl
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     && apt-get clean
@@ -102,7 +102,7 @@ RUN ldconfig
 ENTRYPOINT ["/usr/local/bin/curl"]
 
 # just a step that publishes the deb files to gemfury
-FROM ubuntu:24.04 as deploy
+FROM ubuntu:26.04 as deploy
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates curl \
     && apt-get clean
